@@ -9,21 +9,30 @@ ctx.fillRect(450, 150, 25, 50)
 const canvas =  document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
 
+// Manipulação de DOM para ter acesso ao menu do Game Over.
+const score = document.querySelector('.score_value');
+const finalScore = document.querySelector('.final_score > span');
+const menu = document.querySelector('.menu_screen');
+const btnPlay = document.querySelector('.btn_play');
+
 // Audio de comer o food.
 let audio = new Audio("../01. Audio/audio.mp3");
-
-// Manipulação de DOM para ter acesso ao h1.
-const h1 = document.querySelector('#number');
 
 // Variável que definindo o tamanho do Snake.
 const size = 25;
 
-// Variável que guarda a posição inicial do Snake.
-const snake = [
+const inicialPosition = [
     {x: 100, y: 150},
     {x: 125, y: 150},
     {x: 150, y: 150}
 ];
+
+// Variável que guarda a posição inicial do Snake.
+let snake = inicialPosition;
+
+function incrementScore() {
+    score.innerText = +score.innerText + 25;
+}
 
 // Função que gera aleatoriedade para o contador.
 function ramdonNumber(max, min) {
@@ -36,6 +45,15 @@ function ramdonPosition() {
     return Math.round(number / 25) * 25;
 }
 
+//Inserindo score na tela
+
+
+// Variável que registra as direções.
+let direction 
+
+// Variável que armazena o loop de movimento do Snake.
+let loopId 
+
 function ramdonColor() {
     const red = ramdonNumber(0, 255);
     const green = ramdonNumber(0, 255);
@@ -44,11 +62,6 @@ function ramdonColor() {
     return `rgb(${red}, ${green}, ${blue})`;
 }
 
-
-//Inserindo h1 na tela
-h1.innerHTML = ramdonPosition();
-
-
 // Variável que armazena a comida do Snake. 
 const food = {
     x: ramdonPosition(),
@@ -56,18 +69,16 @@ const food = {
     color: ramdonColor()
 }
 
-// Variável que registra as direções.
-let direction 
-
-// Variável que armazena o loop de movimento do Snake.
-let loopId 
-
 // Função...  Desenhando o Snake no Canvas segundo suas posições.
 function drawSnake() {
     ctx.fillStyle = "greenyellow";
     
 
     snake.forEach((position, index) => {
+        if (index == snake.length -1) {
+            ctx.fillStyle = 'greenyellow';
+        }
+
         ctx.fillRect(position.x, position.y, size, size);
 
     })
@@ -138,6 +149,7 @@ function checkEat() {
     const head = snake[snake.length - 1];
 
     if (head.x == food.x && head.y == food.y) {
+        incrementScore()
         snake.push(head);
         audio.play();
         
@@ -157,7 +169,28 @@ function checkEat() {
 
 // Checagem de colisão
 function checkCollision() {
-    
+    let head = snake[snake.length - 1];
+    const canvasLimit = canvas.width - size;
+    const neckIndex = snake.length - 2;
+
+    const wallCollision = 
+        head.x < 0 || head.x > canvasLimit || head.y < 0 || head.y > canvasLimit;
+
+    const selfCollision = snake.find((position, index) => {
+        return index < neckIndex && position.x == head.x && position.y == head.y;
+    }) 
+    if (wallCollision || selfCollision) {
+        gameOver();
+    }
+}
+
+function gameOver() {
+    direction = undefined;
+
+    menu.style.display = 'flex';
+    finalScore.innerHTML = score.innerText;
+    canvas.style.filter = 'blur(4px)'
+
 }
 
 
@@ -170,6 +203,7 @@ function gameLoop() {
     drawGrid();
     drawFood();
     checkEat();
+    checkCollision();
 
     loopId = setTimeout(() => {
         gameLoop()
@@ -194,3 +228,14 @@ document.addEventListener('keydown', ({key}) => {
     }
 })
 
+btnPlay.addEventListener('click', () => {
+    score.innerText = '00';
+    menu.style.display = 'none';
+    canvas.style.filter = 'none';
+
+    snake = [
+        {x: 100, y: 150},
+        {x: 125, y: 150},
+        {x: 150, y: 150}
+    ];
+})
