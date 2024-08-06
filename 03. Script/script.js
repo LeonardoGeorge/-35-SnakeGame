@@ -9,6 +9,9 @@ ctx.fillRect(450, 150, 25, 50)
 const canvas =  document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
 
+// Audio de comer o food.
+let audio = new Audio("../01. Audio/audio.mp3");
+
 // Manipulação de DOM para ter acesso ao h1.
 const h1 = document.querySelector('#number');
 
@@ -136,6 +139,7 @@ function checkEat() {
 
     if (head.x == food.x && head.y == food.y) {
         snake.push(head);
+        audio.play();
         
         let x = ramdonPosition();
         let y = ramdonPosition();
@@ -149,6 +153,11 @@ function checkEat() {
         food.y = y,
         food.color = ramdonColor()
     }
+}
+
+// Checagem de colisão
+function checkCollision() {
+    
 }
 
 
