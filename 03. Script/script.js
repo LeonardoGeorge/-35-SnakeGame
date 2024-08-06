@@ -9,18 +9,54 @@ ctx.fillRect(450, 150, 25, 50)
 const canvas =  document.querySelector('canvas');
 const ctx = canvas.getContext("2d");
 
+// Manipulação de DOM para ter acesso ao h1.
+const h1 = document.querySelector('#number');
+
 // Variável que definindo o tamanho do Snake.
 const size = 25;
 
-// Variável que guada as posições do Snake.
+// Variável que guarda a posição inicial do Snake.
 const snake = [
     {x: 100, y: 150},
-    {x: 125, y: 150}
-   
+    {x: 125, y: 150},
+    {x: 150, y: 150}
 ];
 
-// Variável que registra as direções;
+// Função que gera aleatoriedade para o contador.
+function ramdonNumber(max, min) {
+    return Math.round(Math.random() * (max - min) + min)
+}
+
+// Função que gera aleatoriedade para a positção da comida.
+function ramdonPosition() {
+    const number = ramdonNumber(0, canvas.width - size);
+    return Math.round(number / 25) * 25;
+}
+
+function ramdonColor() {
+    const red = ramdonNumber(0, 255);
+    const green = ramdonNumber(0, 255);
+    const blue = ramdonNumber(0, 255);
+
+    return `rgb(${red}, ${green}, ${blue})`;
+}
+
+
+//Inserindo h1 na tela
+h1.innerHTML = ramdonPosition();
+
+
+// Variável que armazena a comida do Snake. 
+const food = {
+    x: ramdonPosition(),
+    y: ramdonPosition(),
+    color: ramdonColor()
+}
+
+// Variável que registra as direções.
 let direction 
+
+// Variável que armazena o loop de movimento do Snake.
 let loopId 
 
 // Função...  Desenhando o Snake no Canvas segundo suas posições.
@@ -34,7 +70,36 @@ function drawSnake() {
     })
 }
 
-// Função para mover o Snake
+// Desenhando o a grade de fundo do jogo.
+function drawGrid() {
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#191919'
+
+    for (let i = 25; i < 600; i += 25) {
+        ctx.beginPath();
+        ctx.lineTo(i, 0);
+        ctx.lineTo(i, 600);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.lineTo(0, i);
+        ctx.lineTo(600, i);
+        ctx.stroke();
+    }  
+}
+
+// Desenhando comida do Snake
+function drawFood() {
+    const {x, y, color} = food;
+
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, size, size);
+    ctx.shadowBlur = 0;
+}
+
+// Função para mover o Snake.
 function moveSnake() {
     // Verificação para saber se a varrável direction contém algo. 
     if (!direction){
@@ -66,33 +131,56 @@ function moveSnake() {
     
 }
 
+function checkEat() {
+    const head = snake[snake.length - 1];
+
+    if (head.x == food.x && head.y == food.y) {
+        snake.push(head);
+        
+        let x = ramdonPosition();
+        let y = ramdonPosition();
+
+        while (snake.find((position) => position.x == x && position.y == y)) {
+            x = ramdonPosition();
+            y = ramdonPosition();
+        }
+
+        food.x = x,
+        food.y = y,
+        food.color = ramdonColor()
+    }
+}
+
+
 // Função de loop para mover o Snake.
 function gameLoop() {
     ctx.clearRect(0, 0, 600, 600)
 
     drawSnake();
     moveSnake();
+    drawGrid();
+    drawFood();
+    checkEat();
 
     loopId = setTimeout(() => {
         gameLoop()
-    }, 200)
+    }, 200);
 
 }
-
 gameLoop()
 
-
+// Add evento de funcionamento de teclas.
 document.addEventListener('keydown', ({key}) => {
-    if (key == "ArrowDown") {
+    if (key == "ArrowDown" && direction !== "up") {
         direction = "down";
     }
-    if (key == "ArrowRight") {
+    if (key == "ArrowRight" && direction !== "left") {
         direction = "right"
     }
-    if (key == "ArrowLeft") {
+    if (key == "ArrowLeft" && direction !== "right") {
         direction = "left"
     }
-    if (key == "ArrowUp") {
+    if (key == "ArrowUp" && direction !== "down") {
         direction = "up"
     }
 })
