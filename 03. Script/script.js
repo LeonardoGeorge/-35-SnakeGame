@@ -229,6 +229,16 @@ document.addEventListener('keydown', ({key}) => {
 })
 
 btnPlay.addEventListener('click', () => {
+    iniciarJogo();
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        iniciarJogo();
+    }
+});
+
+function iniciarJogo() {
     score.innerText = '00';
     menu.style.display = 'none';
     canvas.style.filter = 'none';
@@ -238,4 +248,4 @@ btnPlay.addEventListener('click', () => {
         {x: 125, y: 150},
         {x: 150, y: 150}
     ];
-})
+}
